@@ -64,7 +64,7 @@ export default function Modal({ title, content, onClose, isOpen }) {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 text-gray-400 hover:text-red-500 dark:text-gray-300 text-2xl font-bold"
+            className="absolute top-3 right-3 text-gray-400 hover:text-gray-500 text-2xl font-bold"
           >
             &times;
           </button>
