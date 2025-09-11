@@ -417,7 +417,7 @@ export default function ResumeBuilder() {
               Education
             </h3>
             {data.education.map((edu, i) => (
-              <div className="grid grid-col-1 gap-2">
+              <div className="grid grid-col-1 gap-2" key={i}>
                 <div className="flex justify-between items-center">
                   <p className="text-[#247151] text-sm">Education - {i + 1}</p>
 
@@ -427,7 +427,6 @@ export default function ResumeBuilder() {
                   />
                 </div>
                 <div
-                  key={i}
                   className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4"
                 >
                   <input
@@ -479,7 +478,7 @@ export default function ResumeBuilder() {
               Work Experience
             </h3>
             {data.experience.map((exp, i) => (
-              <div className="grid grid-col-1 gap-2">
+              <div className="grid grid-col-1 gap-2" key={i}>
                 <div className="flex justify-between items-center">
                   <p className="text-[#247151] text-sm">Experience - {i + 1}</p>
                   <MdOutlineDelete
@@ -487,7 +486,7 @@ export default function ResumeBuilder() {
                     className=" text-2xl text-[#229477] hover:text-[#247151] cursor-pointer"
                   />
                 </div>
-                <div key={i} className="mb-4">
+                <div  className="mb-4">
                   <input
                     type="text"
                     name="title"
@@ -576,7 +575,7 @@ export default function ResumeBuilder() {
               Projects
             </h3>
             {data.projects.map((proj, i) => (
-              <div className="grid grid-col-1 gap-2">
+              <div className="grid grid-col-1 gap-2" key={i}>
                 <div className="flex justify-between items-center">
                   <p className="text-[#247151] text-sm">Project - {i + 1}</p>
                   <MdOutlineDelete
@@ -584,7 +583,7 @@ export default function ResumeBuilder() {
                     className=" text-2xl text-[#229477] hover:text-[#247151] cursor-pointer"
                   />
                 </div>
-                <div key={i} className="mb-4">
+                <div className="mb-4">
                   <input
                     type="text"
                     name="name"
@@ -646,7 +645,7 @@ export default function ResumeBuilder() {
             // className="px-8 py-3 font-sans text-[10px] "
             className="px-8 py-3 font-sans text-[10px] max-w-[595px]"
           >
-            {/* data.Personal info  */}
+            {/* Personal info  */}
             <div className="mb-1 flex items-center flex-col ">
               <h1 className="text-[24px]">
                 {data.personal.fullName || "Your Name"}
@@ -774,7 +773,7 @@ export default function ResumeBuilder() {
               {data.projects.length === 0 && <p>No projects added.</p>}
               {data.projects.map((proj, i) =>
                 proj.name || proj.description ? (
-                  <div className="flex flex-col mt-1 ms-1">
+                  <div className="flex flex-col mt-1 ms-1" key={i}>
                     <div className="flex justify-between">
                       <div className="flex min-w-40 ">
                         <strong>{proj.name} </strong>&nbsp;|&nbsp;
