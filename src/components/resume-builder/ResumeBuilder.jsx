@@ -8,6 +8,8 @@ import { PiClockCounterClockwise } from "react-icons/pi";
 import Modal from "../reusable/Modal";
 import toast from "react-hot-toast";
 import { MdOutlineDelete, MdOutlineAddCircleOutline } from "react-icons/md";
+import { PDFDownloadLink, PDFViewer, pdf } from "@react-pdf/renderer";
+import ResumePDF from "../reusable/ResumePDF";
 
 export default function ResumeBuilder() {
   let initialState = {
@@ -172,60 +174,146 @@ export default function ResumeBuilder() {
     return formatted;
   };
   const saveDraft = () => {
+    setData((prev) => ({
+      ...prev,
+      info: {
+        ...prev.info,
+        updateAt: new Date().toISOString(),
+      },
+    }));
     localStorage.setItem("resumeData", JSON.stringify(data));
-    toast.success("Saved your details")
+    toast.success("Saved your details");
   };
+  // const downloadPDF = () => {
+  //   if (!previewRef.current) return;
+
+  //   html2canvas(previewRef.current, { scale: 3 }).then((canvas) => {
+  //     const imgData = canvas.toDataURL("image/png", 1.0); // high quality
+  //     const pdf = new jsPDF("p", "mm", "a4"); // A4 page, portrait
+  //     const pdfWidth = pdf.internal.pageSize.getWidth();
+  //     const pdfHeight = pdf.internal.pageSize.getHeight();
+
+  //     // Convert canvas to A4 size while keeping aspect ratio
+  //     const imgWidth = pdfWidth;
+  //     const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  //     let position = 0;
+  //     if (imgHeight <= pdfHeight) {
+  //       // Single page
+  //       pdf.addImage(
+  //         imgData,
+  //         "PNG",
+  //         0,
+  //         position,
+  //         imgWidth,
+  //         imgHeight,
+  //         "",
+  //         "FAST"
+  //       );
+  //     } else {
+  //       // Multi-page handling
+  //       let heightLeft = imgHeight;
+  //       while (heightLeft > 0) {
+  //         pdf.addImage(
+  //           imgData,
+  //           "PNG",
+  //           0,
+  //           position,
+  //           imgWidth,
+  //           imgHeight,
+  //           "",
+  //           "FAST"
+  //         );
+  //         heightLeft -= pdfHeight;
+  //         position -= pdfHeight;
+  //         if (heightLeft > 0) {
+  //           pdf.addPage();
+  //         }
+  //       }
+  //     }
+
+  //     pdf.save("CV.pdf");
+  //   });
+  // };
+
   const downloadPDF = () => {
     if (!previewRef.current) return;
 
     html2canvas(previewRef.current, { scale: 3 }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png", 1.0); // high quality
-      const pdf = new jsPDF("p", "mm", "a4"); // A4 page, portrait
+      const imgData = canvas.toDataURL("image/png", 1.0);
+      const pdf = new jsPDF("p", "mm", "a4");
+
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      // Convert canvas to A4 size while keeping aspect ratio
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      const headerSpace = 5; // mm
+      const footerSpace = 5; // mm
+      const usableHeight = pdfHeight - headerSpace - footerSpace;
+
+      // Calculate the ratio between canvas px and PDF mm
+      const pxPerMm = canvas.height / imgHeightInMm(canvas, pdfWidth);
 
       let position = 0;
-      if (imgHeight <= pdfHeight) {
-        // Single page
-        pdf.addImage(
-          imgData,
-          "PNG",
+      let page = 1;
+
+      while (position < canvas.height) {
+        // Create a temporary canvas for the current slice
+        const sliceCanvas = document.createElement("canvas");
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = usableHeight * pxPerMm; // slice height in px
+
+        const ctx = sliceCanvas.getContext("2d");
+        ctx.drawImage(
+          canvas,
           0,
           position,
-          imgWidth,
-          imgHeight,
+          canvas.width,
+          sliceCanvas.height,
+          0,
+          0,
+          canvas.width,
+          sliceCanvas.height
+        );
+
+        const sliceImg = sliceCanvas.toDataURL("image/png", 1.0);
+        const sliceHeightMm =
+          (sliceCanvas.height * pdfWidth) / sliceCanvas.width;
+
+        pdf.addImage(
+          sliceImg,
+          "PNG",
+          0,
+          headerSpace,
+          pdfWidth,
+          sliceHeightMm,
           "",
           "FAST"
         );
-      } else {
-        // Multi-page handling
-        let heightLeft = imgHeight;
-        while (heightLeft > 0) {
-          pdf.addImage(
-            imgData,
-            "PNG",
-            0,
-            position,
-            imgWidth,
-            imgHeight,
-            "",
-            "FAST"
-          );
-          heightLeft -= pdfHeight;
-          position -= pdfHeight;
-          if (heightLeft > 0) {
-            pdf.addPage();
-          }
+
+        // --- Header ---
+        // pdf.setFontSize(10);
+        // pdf.text("My Resume", pdfWidth / 2, 7, { align: "center" });
+
+        // // --- Footer ---
+        // pdf.setFontSize(8);
+        // pdf.text(`Page ${page}`, pdfWidth / 2, pdfHeight - 5, { align: "center" });
+
+        position += sliceCanvas.height; // move down
+        if (position < canvas.height) {
+          pdf.addPage();
+          page++;
         }
       }
 
       pdf.save("CV.pdf");
     });
+
+    // helper to convert canvas height in mm
+    function imgHeightInMm(canvas, pdfWidth) {
+      return (canvas.height * pdfWidth) / canvas.width;
+    }
   };
+
   const handleSave = () => {
     if (!tempName.trim()) {
       toast.error("Resume name is required!");
@@ -248,6 +336,48 @@ export default function ResumeBuilder() {
     setTempName(data.info.name); // clear input box
     setIsModalOpen(false);
   };
+  const formatDate = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+  const timeAgo = (isoString) => {
+    if (!isoString) return "";
+
+    const now = new Date();
+    const past = new Date(isoString);
+    const diffMs = now - past;
+
+    const seconds = Math.floor(diffMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(months / 12);
+
+    if (seconds < 60) return "Just now";
+    if (minutes < 60) return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    if (days < 30) return `${days} day${days > 1 ? "s" : ""} ago`;
+    if (months < 12) return `${months} month${months > 1 ? "s" : ""} ago`;
+    return `${years} year${years > 1 ? "s" : ""} ago`;
+  };
+  const handleDownload = async (data) => {
+    const blob = await pdf(<ResumePDF data={data} />).toBlob();
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${data.info.name}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     if (!localStorage.getItem("resumeData") || !data.info.name) {
@@ -255,18 +385,17 @@ export default function ResumeBuilder() {
     }
   }, []);
   useEffect(() => {
-  const handleKeyDown = (e) => {
-    // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
-    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-      e.preventDefault(); // Prevent browser "Save Page"
-      saveDraft();
-    }
-  };
+    const handleKeyDown = (e) => {
+      // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault(); // Prevent browser "Save Page"
+        saveDraft();
+      }
+    };
 
-  window.addEventListener("keydown", handleKeyDown);
-  return () => window.removeEventListener("keydown", handleKeyDown);
-}, [data]); // re-bind if data changes
-
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [data]); // re-bind if data changes
 
   return (
     <div className="min-h-screen bg-[#d6f5e7] text-gray-900 font-sans">
@@ -275,7 +404,6 @@ export default function ResumeBuilder() {
           <h1 className="text-4xl font-bold text-white">ResumeNest</h1>
         </div>
       </header>
-
       <section className="max-w-full mb-8 bg-[#c3efdc] flex justify-center py-8">
         <div className="max-w-7xl w-full  flex justify-between ">
           <div className="flex items-end">
@@ -324,10 +452,21 @@ export default function ResumeBuilder() {
                 }
               />
             </div>
-            {/* <div className="flex items-center ml-5">
+            <div className="flex items-center ml-5">
               <PiClockCounterClockwise />
-              <p className="text-[12px] ml-2">{data.info.createdAt}</p>
-              <p className="text-[12px] ml-2">Updated 19 mins ago</p>
+              {data.info.updateAt && (
+                <p className="text-gray-600 text-sm">
+                  Updated {timeAgo(data.info.updateAt)}
+                </p>
+              )}
+            </div>
+            {/* <div className="text-sm text-gray-600 mt-2">
+              {data.info.createdAt && (
+                <p>Created: {formatDate(data.info.createdAt)}</p>
+              )}
+              {data.info.updateAt && (
+                <p>Last Updated: {formatDate(data.info.updateAt)}</p>
+              )}
             </div> */}
           </div>
           <div className="flex items-center justify-between">
@@ -337,8 +476,21 @@ export default function ResumeBuilder() {
             >
               Save Draft
             </button>
-            <button
+            {/* <button
               onClick={downloadPDF}
+              className="bg-[#115446] hover:bg-[#17846a] text-white px-5 py-2 rounded-lg shadow-lg transition"
+            >
+              Download PDF
+            </button> */}
+            {/* <PDFDownloadLink
+              document={<ResumePDF data={data} />}
+              fileName="Resume.pdf"
+              className="bg-[#115446] hover:bg-[#17846a] text-white px-5 py-2 rounded-lg shadow-lg transition"
+            >
+              {({ loading }) => (loading ? "Preparing PDF..." : "Download PDF")}
+            </PDFDownloadLink> */}
+            <button
+              onClick={() => handleDownload(data)}
               className="bg-[#115446] hover:bg-[#17846a] text-white px-5 py-2 rounded-lg shadow-lg transition"
             >
               Download PDF
@@ -349,7 +501,7 @@ export default function ResumeBuilder() {
 
       <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Form Section */}
-        <section className="bg-[#f2fbf7] rounded-xl shadow-lg p-6 overflow-auto max-h-[90vh]">
+        <section className="bg-[#f2fbf7] rounded-xl shadow-lg p-6 overflow-auto max-h-[100vh]">
           <h2 className="text-2xl font-semibold mb-6 text-[#072721]">
             Enter Your Details
           </h2>
@@ -426,9 +578,7 @@ export default function ResumeBuilder() {
                     className=" text-2xl text-[#229477] hover:text-[#247151] cursor-pointer"
                   />
                 </div>
-                <div
-                  className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4"
-                >
+                <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input
                     type="text"
                     name="degree"
@@ -486,7 +636,7 @@ export default function ResumeBuilder() {
                     className=" text-2xl text-[#229477] hover:text-[#247151] cursor-pointer"
                   />
                 </div>
-                <div  className="mb-4">
+                <div className="mb-4">
                   <input
                     type="text"
                     name="title"
@@ -636,14 +786,15 @@ export default function ResumeBuilder() {
         </section>
 
         {/* Preview Section */}
-        <section className="bg-white rounded-xl shadow-lg   max-h-[90vh] overflow-auto ">
+        <section className="bg-white rounded-xl shadow-lg   max-h-[100vh] overflow-auto ">
           <h2 className="text-2xl font-semibold mb-6 ps-2 text-[#072721]">
             CV Preview
           </h2>
+
           <div
             ref={previewRef}
             // className="px-8 py-3 font-sans text-[10px] "
-            className="px-8 py-3 font-sans text-[10px] max-w-[595px]"
+            className="px-8 font-sans text-[10px] max-w-[595px]"
           >
             {/* Personal info  */}
             <div className="mb-1 flex items-center flex-col ">
@@ -799,7 +950,7 @@ export default function ResumeBuilder() {
 
                     {/* <div className="col-span-3">{proj.description}</div> */}
                     <div
-                      className="flex mt-1"
+                      className=""
                       dangerouslySetInnerHTML={{
                         __html: formatText(proj.description),
                       }}
