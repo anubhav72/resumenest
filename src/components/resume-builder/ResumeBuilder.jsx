@@ -401,12 +401,14 @@ export default function ResumeBuilder() {
     <div className="min-h-screen bg-[#d6f5e7] text-gray-900 font-sans">
       <header className="max-w-full bg-[#072721] flex justify-center py-1">
         <div className="max-w-7xl  w-full  flex justify-between">
-          <h1 className="text-4xl font-bold text-white">ResumeNest</h1>
+          <h1 className="text-4xl font-bold text-white ml-4 sm:ml-0">
+            ResumeNest
+          </h1>
         </div>
       </header>
-      <section className="max-w-full mb-8 bg-[#c3efdc] flex justify-center py-8">
-        <div className="max-w-7xl w-full  flex justify-between ">
-          <div className="flex items-end">
+      <section className="max-w-full mb-8 bg-[#c3efdc] flex justify-center py-8 ">
+        <div className="max-w-7xl w-full flex flex-col sm:flex-row justify-between">
+          <div className="flex items-start sm:items-end flex-col sm:flex-row ml-4 sm:mr-0">
             <div className="flex items-center">
               <p className="text-[24px] mr-2">{data?.info?.name}</p>
               <FiEdit onClick={() => setIsModalOpen(true)} />
@@ -460,38 +462,17 @@ export default function ResumeBuilder() {
                 </p>
               )}
             </div>
-            {/* <div className="text-sm text-gray-600 mt-2">
-              {data.info.createdAt && (
-                <p>Created: {formatDate(data.info.createdAt)}</p>
-              )}
-              {data.info.updateAt && (
-                <p>Last Updated: {formatDate(data.info.updateAt)}</p>
-              )}
-            </div> */}
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex sm:items-center justify-end sm:justify-between  mt-5 sm:mt-0 mr-4 sm-mr-0">
             <button
               onClick={saveDraft}
-              className=" mr-2 bg-[#115446] hover:bg-[#17846a] text-white px-5 py-2 rounded-lg shadow-lg transition"
+              className=" mr-2 bg-[#115446] hover:bg-[#17846a] text-white px-3 py-1 sm:px-5 sm:py-2 text-sm sm:text:lg  rounded-lg shadow-lg transition"
             >
               Save Draft
             </button>
-            {/* <button
-              onClick={downloadPDF}
-              className="bg-[#115446] hover:bg-[#17846a] text-white px-5 py-2 rounded-lg shadow-lg transition"
-            >
-              Download PDF
-            </button> */}
-            {/* <PDFDownloadLink
-              document={<ResumePDF data={data} />}
-              fileName="Resume.pdf"
-              className="bg-[#115446] hover:bg-[#17846a] text-white px-5 py-2 rounded-lg shadow-lg transition"
-            >
-              {({ loading }) => (loading ? "Preparing PDF..." : "Download PDF")}
-            </PDFDownloadLink> */}
             <button
               onClick={() => handleDownload(data)}
-              className="bg-[#115446] hover:bg-[#17846a] text-white px-5 py-2 rounded-lg shadow-lg transition"
+              className="bg-[#115446] hover:bg-[#17846a] text-white px-3 py-1 sm:px-5 sm:py-2 text-sm sm:text:lg rounded-lg shadow-lg transition"
             >
               Download PDF
             </button>
@@ -499,7 +480,7 @@ export default function ResumeBuilder() {
         </div>
       </section>
 
-      <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <main className="max-w-7xl  grid grid-cols-1 lg:grid-cols-2 gap-8 xl:mx-auto  mx-4">
         {/* Form Section */}
         <section className="bg-[#f2fbf7] rounded-xl shadow-lg p-6 overflow-auto max-h-[100vh]">
           <h2 className="text-2xl font-semibold mb-6 text-[#072721]">
@@ -693,7 +674,7 @@ export default function ResumeBuilder() {
           {/* Skills */}
           <div className="mb-8">
             <h3 className="text-lg font-medium mb-4 text-[#247151]">Skills</h3>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid md:grid-cols-2  gap-2">
               <SkillsInputGroup
                 label="Programming Languages"
                 skills={data.skills.programmingLanguages}
