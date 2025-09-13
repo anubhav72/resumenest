@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { MdOutlineDelete, MdOutlineAddCircleOutline } from "react-icons/md";
 import { PDFDownloadLink, PDFViewer, pdf } from "@react-pdf/renderer";
 import ResumePDF from "../reusable/ResumePDF";
+import MarkdownModal from "../reusable/MarkdownModal";
 
 export default function ResumeBuilder() {
   let initialState = {
@@ -638,7 +639,7 @@ export default function ResumeBuilder() {
                     <input
                       type="text"
                       name="location"
-                      placeholder="Location Date"
+                      placeholder="Location"
                       value={exp.location}
                       onChange={(e) => handleArrayChange("experience", i, e)}
                       className="border rounded-lg p-2"
@@ -652,14 +653,17 @@ export default function ResumeBuilder() {
                       className="border rounded-lg p-2"
                     />
                   </div>
-                  <textarea
-                    name="description"
-                    placeholder="Description"
-                    rows={3}
-                    value={exp.description}
-                    onChange={(e) => handleArrayChange("experience", i, e)}
-                    className="border rounded-lg p-2 w-full mb-2"
-                  />
+                  <div className="flex flex-col mb-2">
+                    <textarea
+                      name="description"
+                      placeholder="Description"
+                      rows={3}
+                      value={exp.description}
+                      onChange={(e) => handleArrayChange("experience", i, e)}
+                      className="border rounded-lg p-2 w-full"
+                    />
+                    <MarkdownModal />
+                  </div>
                 </div>
               </div>
             ))}
@@ -738,14 +742,17 @@ export default function ResumeBuilder() {
                       });
                     }}
                   />
-                  <textarea
-                    name="description"
-                    placeholder="Description"
-                    rows={3}
-                    value={proj.description}
-                    onChange={(e) => handleArrayChange("projects", i, e)}
-                    className="border rounded-lg p-2 w-full mb-2"
-                  />
+                  <div className="flex flex-col mb-2">
+                    <textarea
+                      name="description"
+                      placeholder="Description"
+                      rows={3}
+                      value={proj.description}
+                      onChange={(e) => handleArrayChange("projects", i, e)}
+                      className="border rounded-lg p-2 w-full"
+                    />
+                    <MarkdownModal />
+                  </div>
                   <input
                     type="url"
                     name="link"

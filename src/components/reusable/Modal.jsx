@@ -56,9 +56,9 @@ export default function Modal({ title, content, onClose, isOpen }) {
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 z-50 flex items-center justify-center mx-3">
         <div
-          className="bg-white  rounded-xl shadow-lg w-full max-w-md p-6 relative z-50 transform transition-all scale-100"
+          className="bg-white  rounded-xl shadow-lg w-full max-w-md p-3 sm:p-6 relative z-50 transform transition-all scale-100"
           onClick={(e) => e.stopPropagation()} // Prevent backdrop close
         >
           {/* Close Button */}
